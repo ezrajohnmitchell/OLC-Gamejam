@@ -14,11 +14,10 @@ impl Plugin for StarsPlugin {
 #[derive(Component)]
 pub struct Star;
 
-const star_range: i32 = 800;
-const box_size: i32 = 64;
-const layers: i32 = 25;
+const STAR_RANGE: i32 = 8000;
+const BOX_SIZE: i32 = 64;
+const LAYERS: i32 = 25;
 // 1 is large star 8 is small
-const star_types: i32 = 8;
 
 
 fn generate_stars(mut commands: Commands, assets: Res<AssetServer>, mut texture_atlases: ResMut<Assets<TextureAtlas>>) {
@@ -29,23 +28,26 @@ fn generate_stars(mut commands: Commands, assets: Res<AssetServer>, mut texture_
 
     let mut rng = rand::thread_rng();
 
-    for layer in 1..layers {
-        for x in (-star_range..star_range).step_by(box_size as usize) {
-            for y in (-star_range..star_range).step_by(box_size as usize) {
-                if rng.gen_bool(layer as f64 / 100.) {
-                    let (box_x, box_y) = (rng.gen_range(1.0..box_size as f32), rng.gen_range(1.0..box_size as f32));
-                    commands.spawn(SpriteSheetBundle {
-                        texture_atlas: texture_atlas_handle.clone(),
-                        sprite: TextureAtlasSprite {
-                            color: Color::rgb(1.3 - (layer as f32 / 50.), 1.3 - (layer as f32 / 50.), 1.3 - (layer as f32 / 50.)),
-                            index: layer.clamp(0, 8) as usize,
-                            ..default()
-                        },
-                        transform: Transform::from_xyz(x as f32 + box_x, y as f32 + box_y, 0.),
-                        ..default()
-                    });
+    commands.spawn((Name::new("Stars"), SpatialBundle::default()))
+        .with_children(|commands| {
+            for layer in 1..LAYERS {
+                for x in (-STAR_RANGE..STAR_RANGE).step_by(BOX_SIZE as usize) {
+                    for y in (-STAR_RANGE..STAR_RANGE).step_by(BOX_SIZE as usize) {
+                        if rng.gen_bool(layer as f64 / 100.) {
+                            let (box_x, box_y) = (rng.gen_range(1.0..BOX_SIZE as f32), rng.gen_range(1.0..BOX_SIZE as f32));
+                            commands.spawn(SpriteSheetBundle {
+                                texture_atlas: texture_atlas_handle.clone(),
+                                sprite: TextureAtlasSprite {
+                                    color: Color::rgb(1.3 - (layer as f32 / 50.), 1.3 - (layer as f32 / 50.), 1.3 - (layer as f32 / 50.)),
+                                    index: layer.clamp(0, 8) as usize,
+                                    ..default()
+                                },
+                                transform: Transform::from_xyz(x as f32 + box_x, y as f32 + box_y, 0.),
+                                ..default()
+                            });
+                        }
+                    }
                 }
             }
-        }
-    }
+        });
 }
